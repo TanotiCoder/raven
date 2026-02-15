@@ -5,6 +5,7 @@
   "description": "Messaging Application",
   "workspaces": [
     "frontend",
+    "apps/*",
     "packages/*"
   ],
   "main": "index.js",
