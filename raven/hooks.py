@@ -70,6 +70,12 @@ home_page = "app"
 # "Role": "home_page"
 # }
 
+role_home_page = {
+    "System Manager": "app/admin-desk",
+    "Agent": "app/agent-desk",
+    "Admin": "app/admin-desk",
+}
+
 # Generators
 # ----------
 
