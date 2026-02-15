@@ -63,7 +63,7 @@ extend_bootinfo = "raven.boot.boot_session"
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "app"
 
 # website user home page (by Role)
 # role_home_page = {
