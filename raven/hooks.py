@@ -33,7 +33,7 @@ add_to_apps_screen = [
 sounds = [
 	{
 		"name": "raven_notification",
-		"src": "/assets/raven/sounds/raven_notification.mp3",
+		"src": "/assets/raven/sounds/raven_notification_1.mp3",
 		"volume": 1.0,
 	},
 ]
