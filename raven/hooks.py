@@ -34,7 +34,7 @@ sounds = [
 	{
 		"name": "raven_notification",
 		"src": "/assets/raven/sounds/raven_notification.mp3",
-		"volume": 0.2,
+		"volume": 1.0,
 	},
 ]
 
