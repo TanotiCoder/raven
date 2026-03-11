@@ -64,10 +64,10 @@ init({
 const router = createBrowserRouter(
   createRoutesFromElements(
     <>
-      {/* <Route path='/login' lazy={() => import('@/pages/auth/Login')} />
+      <Route path='/login' lazy={() => import('@/pages/auth/Login')} />
       <Route path='/login-with-email' lazy={() => import('@/pages/auth/LoginWithEmail')} />
       <Route path='/signup' lazy={() => import('@/pages/auth/SignUp')} />
-      <Route path='/forgot-password' lazy={() => import('@/pages/auth/ForgotPassword')} /> */}
+      <Route path='/forgot-password' lazy={() => import('@/pages/auth/ForgotPassword')} />
       <Route path="/" element={<ProtectedRoute />} errorElement={<ErrorPage />}>
         <Route path="/" element={<WorkspaceSwitcher />}>
           <Route index element={lastWorkspace && lastChannel && isDesktop ? <Navigate to={`/${lastWorkspace}/${lastChannel}`} replace /> : lastWorkspace ? <Navigate to={`/${lastWorkspace}`} replace /> : <WorkspaceSwitcherGrid />} />
