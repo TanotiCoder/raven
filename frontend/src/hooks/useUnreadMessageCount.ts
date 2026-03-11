@@ -132,6 +132,14 @@ export const useFetchUnreadMessageCount = () => {
     useFrappeEventListener('raven:unread_channel_count_updated', (event) => {
         // If the event is published by the current user, then update the unread count to 0
         if (event.sent_by !== currentUser) {
+            // Play notification sound
+            try {
+                const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
+                audio.play().catch(e => console.warn('Audio play failed:', e))
+            } catch (e) {
+                console.warn('Audio play failed:', e)
+            }
+
             // If the user is already on the channel and is at the bottom of the chat (no base message), then update the unread count to 0
             if (channelID === event.channel_id && !state?.baseMessage) {
                 // Update the unread count on the channel to 0

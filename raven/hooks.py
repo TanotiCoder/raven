@@ -285,3 +285,8 @@ raven_document_link_override = "raven.api.document_link.get_new_app_document_lin
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 ignore_translatable_strings_from = ["frappe"]
+
+
+website_redirects = [
+    {"source": "/raven/login", "target": "/"},
+]
