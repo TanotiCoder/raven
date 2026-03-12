@@ -129,15 +129,28 @@ export const useFetchUnreadMessageCount = () => {
 
     const { updateLastMessageInChannelList } = useUpdateLastMessageInChannelList()
 
+    useEffect(() => {
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission()
+        }
+    }, [])
+
     useFrappeEventListener('raven:unread_channel_count_updated', (event) => {
         // If the event is published by the current user, then update the unread count to 0
         if (event.sent_by !== currentUser) {
-            // Play notification sound
             try {
                 const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
+                audio.volume = 0.65
                 audio.play().catch(e => console.warn('Audio play failed:', e))
             } catch (e) {
                 console.warn('Audio play failed:', e)
+            }
+
+            if (document.hidden && "Notification" in window && Notification.permission === "granted") {
+                new Notification("New message", {
+                    body: `${event.sent_by} sent a message`,
+                    icon: '/assets/raven/images/raven-logo.png'
+                })
             }
 
             // If the user is already on the channel and is at the bottom of the chat (no base message), then update the unread count to 0
