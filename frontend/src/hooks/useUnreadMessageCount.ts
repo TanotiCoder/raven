@@ -63,22 +63,23 @@ export const useFetchUnreadMessageCount = () => {
 
     const { call } = useContext(FrappeContext) as FrappeConfig
 
+    const getChannelData = (channelID: string) => {
+        const channel = channels.find(c => c.name === channelID && c.member_id)
+        if (channel) return channel
+
+        const dmChannel = dm_channels.find(c => c.name === channelID && c.member_id)
+        if (dmChannel) return dmChannel
+
+        return null
+    }
+
+    const isUserChannelMember = (channelID: string) => {
+        return getChannelData(channelID) !== null
+    }
+
     const fetchUnreadCountForChannel = async (channelID: string) => {
 
-        // Check if the user has this channel and is a member of the channel
-        let channelData = null
-
-        // Search in channels
-        const channel = channels.find(c => c.name === channelID && c.member_id)
-        if (channel) {
-            channelData = channel
-        } else {
-            // Search in dm_channels
-            const dmChannel = dm_channels.find(c => c.name === channelID && c.member_id)
-            if (dmChannel) {
-                channelData = dmChannel
-            }
-        }
+        const channelData = getChannelData(channelID)
 
         if (!channelData) {
             // The event was published for a channel that the user does not have access to
@@ -136,12 +137,41 @@ export const useFetchUnreadMessageCount = () => {
     }, [])
 
     useFrappeEventListener('raven:unread_channel_count_updated', (event) => {
+        
+        const channelData = getChannelData(event.channel_id)
+
+        if (!channelData) {
+            // User is not a member of this channel, ignore the event
+            return
+        }
+
+        // Check if the event's timestamp is newer than our known channel timestamp
+        const eventTimestamp = new Date(event.last_message_timestamp).getTime()
+        const currentTimestamp = channelData.last_message_timestamp ? new Date(channelData.last_message_timestamp).getTime() : 0
+
+        if (eventTimestamp <= currentTimestamp) {
+            // Likely a sync or an older message, ignore to prevent duplicate notifications
+            return
+        }
+
         // If the event is published by the current user, then update the unread count to 0
         if (event.sent_by !== currentUser) {
             try {
-                const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
-                audio.volume = 0.4
-                audio.play().catch(e => console.warn('Audio play failed:', e))
+                const rawVolume = localStorage.getItem('raven-notification-volume')
+                let volume = 50 // Default
+                if (rawVolume) {
+                    try {
+                        volume = parseInt(JSON.parse(rawVolume), 10)
+                    } catch (e) {
+                        volume = 50
+                    }
+                }
+
+                if (volume > 0) {
+                    const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
+                    audio.volume = volume / 100
+                    audio.play().catch(e => console.warn('Audio play failed:', e))
+                }
             } catch (e) {
                 console.warn('Audio play failed:', e)
             }
