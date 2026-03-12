@@ -43,10 +43,14 @@ const ChannelHeaderMenu = ({ channelData }: Props) => {
     }, [channelData, channelMembers, currentUser])
 
     return (
-        <><DropdownMenu.Root>
+        <>
+            <IconButton color='gray' onClick={onGlobalSearchModalOpen} className='bg-transparent text-gray-12 hover:bg-gray-3' title="Search channel messages">
+                <BiSearch size={20} />
+            </IconButton>
+            <DropdownMenu.Root>
             <DropdownMenu.Trigger>
                 <IconButton color='gray' className='bg-transparent text-gray-12 hover:bg-gray-3'>
-                    <BiDotsVerticalRounded />
+                    <BiDotsVerticalRounded size={20} />
                 </IconButton>
             </DropdownMenu.Trigger>
             <DropdownMenu.Content className='min-w-48'>
@@ -54,12 +58,6 @@ const ChannelHeaderMenu = ({ channelData }: Props) => {
                     <Flex gap='2' align='center'>
                         <BiVideoPlus size={ICON_SIZE} />
                         Start a Meeting
-                    </Flex>
-                </DropdownMenu.Item>
-                <DropdownMenu.Item onClick={onGlobalSearchModalOpen}>
-                    <Flex gap='2' align='center'>
-                        <BiSearch size={ICON_SIZE} />
-                        Search
                     </Flex>
                 </DropdownMenu.Item>
                 <DropdownMenu.Item onClick={onFileOpen}>

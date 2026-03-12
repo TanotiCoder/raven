@@ -140,7 +140,7 @@ export const useFetchUnreadMessageCount = () => {
         if (event.sent_by !== currentUser) {
             try {
                 const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
-                audio.volume = 0.65
+                audio.volume = 0.4
                 audio.play().catch(e => console.warn('Audio play failed:', e))
             } catch (e) {
                 console.warn('Audio play failed:', e)

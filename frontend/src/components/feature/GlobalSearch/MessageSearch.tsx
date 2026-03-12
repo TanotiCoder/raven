@@ -57,6 +57,16 @@ export const MessageSearch = ({ onToggleMyChannels, isOnlyInMyChannels, onToggle
 
     const handleScrollToMessage = async (messageName: string, channelID: string, workspace?: string) => {
         handleNavigateToChannel(channelID, messageName, workspace)
+        if (debouncedText) {
+            setTimeout(() => {
+                // @ts-ignore
+                if (typeof window.find === 'function') {
+                    // Repeatedly try finding to ensure we hit the highlighted text after dynamic loading
+                    // @ts-ignore
+                    window.find(debouncedText, false, false, true, false, false, false);
+                }
+            }, 800) // Delay to allow the channel page to load and scroll to the message
+        }
     }
 
     const users = useGetUserRecords()

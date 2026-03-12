@@ -6,8 +6,9 @@ import { HStack, Stack } from "@/components/layout/Stack"
 import { Box, Select, IconButton, Popover } from "@radix-ui/themes"
 import { HelperText, Label } from "@/components/common/Form"
 import { useAtom } from "jotai"
-import { EnterKeyBehaviourAtom, QuickEmojisAtom } from "@/utils/preferences"
+import { EnterKeyBehaviourAtom, QuickEmojisAtom, NotificationVolumeAtom } from "@/utils/preferences"
 import { lazy, Suspense } from "react"
+import { Slider } from "@radix-ui/themes"
 import { Loader } from "@/components/common/Loader"
 
 const EmojiPicker = lazy(() => import("@/components/common/EmojiPicker/EmojiPicker"))
@@ -16,6 +17,14 @@ const Preferences = () => {
 
     const [enterKeyBehaviour, setEnterKeyBehaviour] = useAtom(EnterKeyBehaviourAtom)
     const [quickEmojis, setQuickEmojis] = useAtom(QuickEmojisAtom)
+    const [notificationVolume, setNotificationVolume] = useAtom(NotificationVolumeAtom)
+
+    const handleVolumeChange = (value: number[]) => {
+        setNotificationVolume(value[0])
+        const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
+        audio.volume = value[0] / 100
+        audio.play().catch(e => console.warn('Audio preview failed:', e))
+    }
 
     return (
 
@@ -78,6 +87,22 @@ const Preferences = () => {
                         </HStack>
                         <HelperText>
                             Click on any button to set your favorite emoji for quick reactions. These emojis will be available as quick reactions in chat messages.
+                        </HelperText>
+                    </Stack>
+
+                    <Stack className="max-w-[480px]">
+                        <Label htmlFor='NotificationVolume'>Notification Volume ({notificationVolume}%)</Label>
+                        <Box pt="2" pb="2">
+                            <Slider
+                                value={[notificationVolume]}
+                                onValueChange={(val) => setNotificationVolume(val[0])}
+                                onValueCommit={handleVolumeChange}
+                                max={100}
+                                step={1}
+                            />
+                        </Box>
+                        <HelperText>
+                            Adjust the volume of the notification sound when new messages arrive.
                         </HelperText>
                     </Stack>
                 </Stack>
