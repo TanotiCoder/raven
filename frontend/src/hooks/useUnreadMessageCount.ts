@@ -158,12 +158,12 @@ export const useFetchUnreadMessageCount = () => {
         if (event.sent_by !== currentUser) {
             try {
                 const rawVolume = localStorage.getItem('raven-notification-volume')
-                let volume = 50 // Default
+                let volume = 35 // Default
                 if (rawVolume) {
                     try {
                         volume = parseInt(JSON.parse(rawVolume), 10)
                     } catch (e) {
-                        volume = 50
+                        volume = 35
                     }
                 }
 
