@@ -4,7 +4,7 @@ import { Separator } from "@components/ui/separator"
 import { SettingsPanelDescription, SettingsPanelHeader, SettingsPanelTitle, SettingsPanelContent, SettingsFormLabel, SettingsFormDescription, SettingsFormRow, SettingsSectionHeader } from "@components/ui/settings-dialog"
 import { Switch } from "@components/ui/switch"
 import { useAtom, useAtomValue } from "jotai"
-import { EnterKeyBehaviourAtom, QuickEmojisAtom, QuietHoursNudge, hideReadReceiptsAtom, quietHoursConfigAtom, quietHoursNudgeAtom, timeFormatAtom } from "@utils/preferences"
+import { EnterKeyBehaviourAtom, NotificationVolumeAtom, QuickEmojisAtom, QuietHoursNudge, hideReadReceiptsAtom, quietHoursConfigAtom, quietHoursNudgeAtom, timeFormatAtom } from "@utils/preferences"
 import { useQuickEmojiSuggestions } from "@utils/reactionUsage"
 import { EmojiFace } from "@components/common/EmojiFace"
 import { formatWorkingHoursRange } from "@utils/quietHours"
@@ -16,6 +16,7 @@ import useCurrentRavenUser from "@raven/lib/hooks/useCurrentRavenUser"
 import { ArrowDownAzIcon, BellDotIcon, ClockIcon } from "lucide-react"
 import { Popover, PopoverContent, PopoverTrigger } from "@components/ui/popover"
 import { Button } from "@components/ui/button"
+import { Slider } from "@components/ui/slider"
 import { useTheme } from "@components/theme-provider"
 import { customEmojiCategoriesAtom } from "@lib/emojiMart"
 import Picker from "@emoji-mart/react"
@@ -109,6 +110,10 @@ const Preferences = () => {
                         <Separator />
 
                         <QuickEmojis />
+
+                        <Separator />
+
+                        <NotificationVolume />
 
                         {/* ---- Filtering & sorting ---- */}
                         <SettingsSectionHeader>{_("Filtering & sorting")}</SettingsSectionHeader>
@@ -248,9 +253,39 @@ const EnterKeyBehaviour = () => {
     </SettingsFormRow>
 }
 
-const QuickEmojis = () => {
+const NotificationVolume = () => {
 
-    const [quickEmojis, setQuickEmojis] = useAtom(QuickEmojisAtom)
+    const [notificationVolume, setNotificationVolume] = useAtom(NotificationVolumeAtom)
+
+    const handleVolumeChange = (value: number[]) => {
+        setNotificationVolume(value[0])
+        const audio = new Audio('/assets/raven/sounds/raven_notification_1.mp3')
+        audio.volume = value[0] / 100
+        audio.play().catch(() => { /* preview only — autoplay block is fine */ })
+    }
+
+    return <SettingsFormRow>
+        <div className="flex flex-col">
+            <SettingsFormLabel htmlFor="notificationVolume">{_("Notification volume")} ({notificationVolume}%)</SettingsFormLabel>
+            <SettingsFormDescription>
+                {_("Adjust the volume of the notification sound when new messages arrive. Set to 0 to mute.")}
+            </SettingsFormDescription>
+        </div>
+        <div className="min-w-40 flex justify-end items-center">
+            <Slider
+                id="notificationVolume"
+                value={[notificationVolume]}
+                onValueChange={(val) => setNotificationVolume(val[0])}
+                onValueCommit={handleVolumeChange}
+                max={100}
+                step={1}
+                className="w-40"
+            />
+        </div>
+    </SettingsFormRow>
+}
+
+const QuickEmojis = () => {    const [quickEmojis, setQuickEmojis] = useAtom(QuickEmojisAtom)
     const customEmojis = useAtomValue(customEmojiCategoriesAtom)
 
     const { themeValue } = useTheme()

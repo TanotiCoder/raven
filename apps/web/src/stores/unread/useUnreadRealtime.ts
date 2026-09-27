@@ -3,6 +3,7 @@ import { useDebounceCallback } from "usehooks-ts"
 import { useUserCookieData } from "@hooks/useUserCookieData"
 import { channelUnreadStore } from "./store"
 import { channelStore } from "@stores/channels/store"
+import { useEffect } from "react"
 
 /** Coalesce window for the delete reconcile — long enough that a batch delete (N separate
  *  events), or several deletes across channels, collapse into one refetch. */
@@ -67,9 +68,53 @@ type UnreadChannelEvent = {
  * If a message was deleted, the latest message timestamp sent by the server may or may not be greater than the last visit timestamp we have locally.
  * So we cannot increment by one in this case. Hence, the backend now sends the event_type as "message_deleted" in case of a message deletion.
  */
+
+/** Reads the Preferences-panel volume (0-100). 35 = default, 0 = mute. */
+const getNotificationVolume = (): number => {
+    try {
+        const raw = localStorage.getItem("raven-notification-volume")
+        if (raw) return parseInt(JSON.parse(raw), 10)
+    } catch {
+        /* corrupted value — fall through to default */
+    }
+    return 35
+}
+
+/** Plays the new-message sound unless muted. Failures are expected
+ *  (autoplay policy) and never surface to the user. */
+const playNotificationSound = () => {
+    try {
+        const volume = getNotificationVolume()
+        if (volume <= 0) return
+        const audio = new Audio("/assets/raven/sounds/raven_notification_1.mp3")
+        audio.volume = volume / 100
+        audio.play().catch(() => { /* autoplay blocked — fine */ })
+    } catch {
+        /* Audio unavailable — fine */
+    }
+}
+
+/** OS-level notification, only when the tab is hidden (visible tabs already
+ *  show the message + badge). Requires granted permission. */
+const showHiddenTabNotification = (sentBy: string) => {
+    if (!document.hidden || !("Notification" in window)) return
+    if (Notification.permission !== "granted") return
+    new Notification("New message", {
+        body: `${sentBy} sent a message`,
+        icon: "/assets/raven/images/raven-logo.png",
+    })
+}
+
 export const useUnreadRealtime = () => {
     const { name: currentUser } = useUserCookieData()
     const { mutate } = useSWRConfig()
+
+    // Ask once for OS notification permission so hidden-tab alerts can show.
+    useEffect(() => {
+        if ("Notification" in window && Notification.permission === "default") {
+            Notification.requestPermission().catch(() => { /* denied — fine */ })
+        }
+    }, [])
 
     /**
      * A delete can't be safely decremented locally (the event lacks the deleted message's
@@ -102,6 +147,8 @@ export const useUnreadRealtime = () => {
                 // Only increment this if the user is a member of the channel
                 if (channelStore.getChannel(event.channel_id)?.member_id) {
                     channelUnreadStore.increment(event.channel_id, event.last_message_timestamp)
+                    playNotificationSound()
+                    showHiddenTabNotification(event.sent_by)
                 }
             } else if (event.event_type === "message_deleted") {
                 // A delete can't be safely decremented locally (no deleted-message timestamp on a

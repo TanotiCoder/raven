@@ -33,8 +33,8 @@ add_to_apps_screen = [
 sounds = [
 	{
 		"name": "raven_notification",
-		"src": "/assets/raven/sounds/raven_notification.mp3",
-		"volume": 0.2,
+		"src": "/assets/raven/sounds/raven_notification_1.mp3",
+		"volume": 1.0,
 	},
 ]
 
@@ -63,12 +63,18 @@ extend_bootinfo = "raven.boot.boot_session"
 # ----------
 
 # application home page (will override Website Settings)
-# home_page = "login"
+home_page = "app"
 
 # website user home page (by Role)
 # role_home_page = {
 # "Role": "home_page"
 # }
+
+role_home_page = {
+    "System Manager": "app/admin-desk",
+    "Agent": "app/agent-desk",
+    "Admin": "app/admin-desk",
+}
 
 # Generators
 # ----------
@@ -301,3 +307,8 @@ raven_document_link_override = "raven.api.document_link.get_new_app_document_lin
 ignore_translatable_strings_from = ["frappe"]
 
 sqlite_search = ["raven.api.search.RavenSearch"]
+
+
+website_redirects = [
+    {"source": "/raven/login", "target": "/"},
+]
