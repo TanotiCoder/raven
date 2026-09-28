@@ -26,6 +26,7 @@ import { GetMessagesResponse } from "./useChatStream"
 import { useIsMobile } from "@/hooks/useMediaQuery"
 import { getFileType } from "@/utils/layout/FileExtIcon"
 import { getFileExtension } from "@/utils/operations"
+import { SubscriptionExpiredModal } from "../ChatInput/SubscriptionExpiredModal"
 
 const COOL_PLACEHOLDERS = [
     "Delivering messages atop dragons 🐉 is available on a chargeable basis.",
@@ -221,6 +222,7 @@ export const ChatBoxBody = ({ channelData }: ChatBoxBodyProps) => {
 
     return (
         <ChatBoxBodyContainer>
+            <SubscriptionExpiredModal />
             <FileDrop
                 files={files}
                 ref={fileInputRef}

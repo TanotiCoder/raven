@@ -21,6 +21,7 @@ import { useSWRConfig } from "frappe-react-sdk"
 import { GetMessagesResponse } from "../../chat/ChatStream/useChatStream"
 import { RavenMessage } from "@/types/RavenMessaging/RavenMessage"
 import { useIsMobile } from "@/hooks/useMediaQuery"
+import { SubscriptionExpiredModal } from "../../chat/ChatInput/SubscriptionExpiredModal"
 
 export const ThreadMessages = ({ threadMessage }: { threadMessage: Message }) => {
 
@@ -160,6 +161,7 @@ export const ThreadMessages = ({ threadMessage }: { threadMessage: Message }) =>
 
     return (
         <Flex direction='column' justify={'between'} gap='0' className="h-full p-4">
+            <SubscriptionExpiredModal />
             <FileDrop
                 files={files}
                 areaHeight="h-[calc(100vh-72px)]"

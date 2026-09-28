@@ -6,7 +6,8 @@ import { RavenMessage } from '@/types/RavenMessaging/RavenMessage'
 import { toast } from 'sonner'
 import { getErrorMessage } from '@/components/layout/AlertBanner/ErrorBanner'
 import { atomFamily } from 'jotai/utils'
-import { atom, useAtom } from 'jotai'
+import { atom, useAtom, useSetAtom } from 'jotai'
+import { subscriptionExpiredModalAtom } from '../SubscriptionExpiredModal'
 
 
 export const fileExt = ['jpg', 'JPG', 'jpeg', 'JPEG', 'png', 'PNG', 'gif', 'GIF']
@@ -31,6 +32,20 @@ export default function useFileUpload(channelID: string) {
   filesStateRef.current = files
 
   const [fileUploadProgress, setFileUploadProgress] = useState<Record<string, FileUploadProgress>>({})
+
+  const showExpiredModal = useSetAtom(subscriptionExpiredModalAtom)
+
+  const isExpiryError = async (e: unknown): Promise<boolean> => {
+    const msg = getErrorMessage(e as any) + ' ' + ((e as any)?.message || '')
+    if (msg.includes('Subscription Expired')) return true
+    try {
+      const res = await fetch('/api/method/opsdesk.subscription.get_subscription_info', { credentials: 'same-origin' })
+      const data = await res.json()
+      return data?.message?.status === 'Expired'
+    } catch {
+      return false
+    }
+  }
 
   const addFile = (file: File) => {
 
@@ -91,12 +106,18 @@ export default function useFileUpload(channelID: string) {
             }))
             return res.data.message
           })
-          .catch((e) => {
+          .catch(async (e) => {
             setFileUploadProgress(p => {
               const newProgress = { ...p }
               delete newProgress[f.fileID]
               return newProgress
             })
+
+            // Expired subscription → center modal, no side toast
+            if (await isExpiryError(e)) {
+              showExpiredModal(true)
+              return null
+            }
 
             toast.error("There was an error uploading the file " + f.name, {
               description: getErrorMessage(e)

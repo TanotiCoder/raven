@@ -10,6 +10,17 @@ from raven.api.raven_channel import create_direct_message_channel, get_peer_user
 from raven.utils import get_channel_member, is_channel_member, track_channel_visit
 
 
+def _assert_subscription_active():
+	"""OpsDesk subscription lock — expired hone par message block.
+	opsdesk app na ho to silently skip (standalone Raven support)."""
+	try:
+		from opsdesk.subscription import assert_subscription_active
+
+		assert_subscription_active()
+	except ImportError:
+		return
+
+
 @frappe.whitelist(methods=["POST"])
 def send_message(
 	channel_id: str,
@@ -19,6 +30,7 @@ def send_message(
 	json_content: dict | str | None = None,
 	send_silently: bool = False,
 ):
+	_assert_subscription_active()
 	if is_reply:
 		doc = frappe.get_doc(
 			{
@@ -547,6 +559,7 @@ def forward_message(message_receivers: list[dict], forwarded_message: dict):
 	"""
 	Forward a message to multiple users/ or in multiple channels
 	"""
+	_assert_subscription_active()
 	for receiver in message_receivers:
 		if receiver["type"] == "User":
 			# send forwarded message as a DM to the user

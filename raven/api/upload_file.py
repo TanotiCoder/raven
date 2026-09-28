@@ -62,6 +62,14 @@ def upload_file_with_message():
 	3. If the file is an image, we need to measure it's dimensions
 	4. Store the file URL and the dimensions in the Raven Message Doc
 	"""
+	# OpsDesk subscription lock — expired hone par file/image message block
+	try:
+		from opsdesk.subscription import assert_subscription_active
+
+		assert_subscription_active()
+	except ImportError:
+		pass
+
 	fileExt = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "gif", "GIF", "webp", "WEBP"]
 	thumbnailExt = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG"]
 

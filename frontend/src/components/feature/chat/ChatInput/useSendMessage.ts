@@ -2,12 +2,43 @@ import { useFrappePostCall } from 'frappe-react-sdk'
 import { Message } from '../../../../../../types/Messaging/Message'
 import { RavenMessage } from '@/types/RavenMessaging/RavenMessage'
 import { useCallback } from 'react'
+import { toast } from 'sonner'
+import { useSetAtom } from 'jotai'
+import { subscriptionExpiredModalAtom } from './SubscriptionExpiredModal'
 import { filesAtom } from './FileInput/useFileUpload'
 import { useAtomCallback } from 'jotai/utils'
 
 export const useSendMessage = (channelID: string, uploadFiles: (selectedMessage?: Message | null, caption?: string) => Promise<RavenMessage[]>, onMessageSent: (messages: RavenMessage[]) => void, selectedMessage?: Message | null) => {
 
     const { call, loading } = useFrappePostCall<{ message: RavenMessage }>('raven.api.raven_message.send_message')
+
+    const showExpiredModal = useSetAtom(subscriptionExpiredModalAtom)
+
+    // 403 responses don't carry the server message, so confirm expiry
+    // directly instead of trusting err.message.
+    // Uses opsdesk.subscription.get_subscription_info as single source of truth.
+    const isSubscriptionExpired = useCallback(async (serverMessage: string): Promise<boolean> => {
+        if (serverMessage.includes('Subscription Expired')) return true
+        try {
+            const res = await fetch('/api/method/opsdesk.subscription.get_subscription_info', { credentials: 'same-origin' })
+            const data = await res.json()
+            return data?.message?.status === 'Expired'
+        } catch {
+            return false
+        }
+    }, [])
+
+    const handleSendError = useCallback(async (err: unknown) => {
+        const serverMessage = (err as { message?: string })?.message || ''
+        if (await isSubscriptionExpired(serverMessage)) {
+            showExpiredModal(true)
+        } else {
+            toast.error('Message nahi gaya', {
+                description: serverMessage || undefined,
+            })
+        }
+        throw err
+    }, [isSubscriptionExpired, showExpiredModal])
 
     // const files = useAtomValue(filesAtom(channelID))
 
@@ -25,8 +56,11 @@ export const useSendMessage = (channelID: string, uploadFiles: (selectedMessage?
         if (content && hasFiles) {
             return uploadFiles(selectedMessage, content)
                 .then((res) => {
+                    // uploadFile hook shows the modal itself on expiry and returns []
+                    if (!res.length) return
                     onMessageSent(res)
                 })
+                .catch((err) => handleSendError(err))
         }
         // If we only have content, send a regular text message
         else if (content) {
@@ -39,19 +73,22 @@ export const useSendMessage = (channelID: string, uploadFiles: (selectedMessage?
                 send_silently: sendSilently ? true : false
             })
                 .then((res) => onMessageSent([res.message]))
+                .catch((err) => handleSendError(err))
         }
         // If we only have files, upload them without caption
         else if (hasFiles) {
             return uploadFiles(selectedMessage)
                 .then((res) => {
+                    if (!res.length) return
                     onMessageSent(res)
                 })
+                .catch((err) => handleSendError(err))
         }
         // No content and no files - do nothing
         else {
             return Promise.resolve()
         }
-    }, [channelID, selectedMessage, uploadFiles, onMessageSent])
+    }, [channelID, selectedMessage, uploadFiles, onMessageSent, handleSendError, getFiles])
 
 
     return {
