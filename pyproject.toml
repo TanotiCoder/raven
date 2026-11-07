@@ -14,9 +14,7 @@ dependencies = [
  "openai-agents>=0.17.2",
  "markitdown",
  "pandas",
- "google-cloud-documentai",
- "pydantic~=2.10.2",
- "PyJWT~=2.8.0"
+ "google-cloud-documentai"
 ]
 
 [build-system]
