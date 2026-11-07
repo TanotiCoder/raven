@@ -361,6 +361,16 @@ def desk_has_raven_icon() -> bool:
 	return (major, minor) >= (16, 50)
 
 
+def assert_subscription_active() -> None:
+	"""OpsDesk subscription lock. Skipped when the opsdesk app is not installed."""
+	try:
+		from opsdesk.subscription import assert_subscription_active as _assert
+	except ImportError:
+		return
+
+	_assert()
+
+
 def get_raven_user(user_id: str) -> str:
 	"""
 	Get the Raven User ID of a user

@@ -4,7 +4,9 @@ import { Separator } from "@components/ui/separator"
 import { SettingsPanelDescription, SettingsPanelHeader, SettingsPanelTitle, SettingsPanelContent, SettingsFormLabel, SettingsFormDescription, SettingsFormRow, SettingsSectionHeader } from "@components/ui/settings-dialog"
 import { Switch } from "@components/ui/switch"
 import { useAtom, useAtomValue } from "jotai"
-import { EnterKeyBehaviourAtom, QuickEmojisAtom, QuietHoursNudge, hideReadReceiptsAtom, quietHoursConfigAtom, quietHoursNudgeAtom, timeFormatAtom } from "@utils/preferences"
+import { EnterKeyBehaviourAtom, NotificationVolumeAtom, QuickEmojisAtom, QuietHoursNudge, hideReadReceiptsAtom, quietHoursConfigAtom, quietHoursNudgeAtom, timeFormatAtom } from "@utils/preferences"
+import { playNotificationSound } from "@lib/notificationSound"
+import { Slider } from "@components/ui/slider"
 import { useQuickEmojiSuggestions } from "@utils/reactionUsage"
 import { EmojiFace } from "@components/common/EmojiFace"
 import { formatWorkingHoursRange } from "@utils/quietHours"
@@ -105,6 +107,10 @@ const Preferences = () => {
                         <Separator />
 
                         <EnterKeyBehaviour />
+
+                        <Separator />
+
+                        <NotificationVolume />
 
                         <Separator />
 
@@ -244,6 +250,34 @@ const EnterKeyBehaviour = () => {
                     <SelectItem value="new-line">{_("Start a new line")}</SelectItem>
                 </SelectContent>
             </Select>
+        </div>
+    </SettingsFormRow>
+}
+
+const NotificationVolume = () => {
+
+    const [notificationVolume, setNotificationVolume] = useAtom(NotificationVolumeAtom)
+
+    return <SettingsFormRow>
+        <div className="flex flex-col">
+            <SettingsFormLabel htmlFor="notification_volume">{_("Notification volume")}</SettingsFormLabel>
+            <SettingsFormDescription>
+                {_("Volume of the sound played when a new message arrives. Set it to 0 to mute.")}
+            </SettingsFormDescription>
+        </div>
+        <div className="flex min-w-40 items-center justify-end gap-2">
+            <Slider
+                id="notification_volume"
+                className="w-28"
+                value={[notificationVolume]}
+                onValueChange={([value]) => setNotificationVolume(value)}
+                // Preview on release — not on every drag tick.
+                onValueCommit={([value]) => playNotificationSound(value)}
+                min={0}
+                max={100}
+                step={1}
+            />
+            <span className="w-9 text-right text-p-sm text-ink-gray-5">{notificationVolume}%</span>
         </div>
     </SettingsFormRow>
 }

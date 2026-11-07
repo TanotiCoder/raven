@@ -3,6 +3,7 @@ import { useDebounceCallback } from "usehooks-ts"
 import { useUserCookieData } from "@hooks/useUserCookieData"
 import { channelUnreadStore } from "./store"
 import { channelStore } from "@stores/channels/store"
+import { playNotificationSound } from "@lib/notificationSound"
 
 /** Coalesce window for the delete reconcile — long enough that a batch delete (N separate
  *  events), or several deletes across channels, collapse into one refetch. */
@@ -102,6 +103,7 @@ export const useUnreadRealtime = () => {
                 // Only increment this if the user is a member of the channel
                 if (channelStore.getChannel(event.channel_id)?.member_id) {
                     channelUnreadStore.increment(event.channel_id, event.last_message_timestamp)
+                    playNotificationSound()
                 }
             } else if (event.event_type === "message_deleted") {
                 // A delete can't be safely decremented locally (no deleted-message timestamp on a

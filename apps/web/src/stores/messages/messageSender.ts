@@ -10,6 +10,7 @@ import { channelUnreadStore } from "@stores/unread/store"
 import { putOutbox, removeOutbox, setOutboxStatus, isSettling, getOutbox } from "./outbox"
 import type { OptimisticMessage } from "./types"
 import { errorResponseToast } from "@components/ui/error-banner"
+import { isSubscriptionExpired, showSubscriptionExpired } from "@utils/subscription"
 
 /** Minimal Frappe client — `call` from FrappeContext. */
 export type PostClient = {
@@ -238,7 +239,7 @@ export const submitSend = (
             channelMessagesStore.resolveOptimisticSend(channelID, batchId, res.message ?? [])
             removeOutbox(batchId)
         })
-        .catch((error: FrappeError) => {
+        .catch(async (error: FrappeError) => {
             // Offline: don't show an error — the message stays on screen as "sending"
             // and useOutboxAutoRetry will send it again once the connection is back.
             if (!navigator.onLine) return
@@ -250,6 +251,11 @@ export const submitSend = (
             // been restored) and re-runs this same classification.
             const isPermissionError = error?.exc_type === "PermissionError" || error?.httpStatus === 403
             setOutboxStatus(batchId, isPermissionError ? "rejected" : "failed")
+            // Subscription expired: the renewal dialog is the whole message — no toast.
+            if (await isSubscriptionExpired(error)) {
+                showSubscriptionExpired()
+                return
+            }
             if (opts?.suppressErrorToast) return
             // One shared id means many failures at once show a single error, not a
             // pile of them. (The failed message on screen is the main signal; this

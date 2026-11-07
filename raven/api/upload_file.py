@@ -10,6 +10,8 @@ from frappe.handler import upload_file
 from frappe.utils.image import optimize_image
 from PIL import Image, ImageOps
 
+from raven.utils import assert_subscription_active
+
 
 def upload_JPEG_wrt_EXIF(content, filename, optimize=False):
 	"""
@@ -62,6 +64,7 @@ def upload_file_with_message():
 	3. If the file is an image, we need to measure it's dimensions
 	4. Store the file URL and the dimensions in the Raven Message Doc
 	"""
+	assert_subscription_active()
 	fileExt = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG", "gif", "GIF", "webp", "WEBP"]
 	thumbnailExt = ["jpg", "JPG", "jpeg", "JPEG", "png", "PNG"]
 

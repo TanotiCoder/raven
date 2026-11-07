@@ -112,3 +112,11 @@ export const DoubleTapReactionAtom = atomWithStorage<QuickEmoji>(
     siteStorage(),
     { getOnInit: true },
 )
+
+/** Volume (0–100) of the sound played when a new message arrives. 0 mutes it. */
+export const NotificationVolumeAtom = atomWithStorage<number>(
+    "raven-notification-volume",
+    35,
+    siteStorage(),
+    { getOnInit: true },
+)

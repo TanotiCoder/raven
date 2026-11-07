@@ -7,7 +7,7 @@ from frappe.utils import cint
 from raven.api.chat_stream import message_columns
 from raven.api.raven_channel import create_direct_message_channel, get_peer_user_id_from_dm_users
 from raven.api.search import channel_access_condition
-from raven.utils import desk_has_raven_icon, get_channel_member
+from raven.utils import assert_subscription_active, desk_has_raven_icon, get_channel_member
 
 
 @frappe.whitelist(methods=["POST"])
@@ -19,6 +19,7 @@ def send_message(
 	json_content: dict | str | None = None,
 	send_silently: bool = False,
 ):
+	assert_subscription_active()
 	if is_reply:
 		doc = frappe.get_doc(
 			{
@@ -230,6 +231,7 @@ def send_message_with_attachments(
 	key: a retried send (same client_id) returns the already-created messages
 	instead of duplicating them. It is not persisted beyond the batch id.
 	"""
+	assert_subscription_active()
 	if isinstance(files, str):
 		files = frappe.parse_json(files)
 	files = files or []
@@ -957,6 +959,7 @@ def forward_message(
 	"""
 	Forward a message to multiple users/ or in multiple channels
 	"""
+	assert_subscription_active()
 	# The copy is always built from the database, including every member when
 	# the message is part of a batch. The v3 client sends just the message id.
 	# Older clients (the old mobile app) send the whole message: only its name

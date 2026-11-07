@@ -40,6 +40,7 @@ import { SessionBroadcast } from "./SessionBroadcast"
 import RavenSettingsDialog from "@components/features/settings/SettingsDialog"
 import { SetupGate } from "@components/features/setup/SetupGate"
 import { MessageActionDialogs } from "@components/features/message/actions/MessageActionDialogs"
+import { SubscriptionExpiredModal } from "@components/features/ChatInput/SubscriptionExpiredModal"
 
 /**
  * The AppShell is used to wrap the entire application and provide all the utilities
@@ -70,6 +71,7 @@ const AppShell = () => {
                     from dialog.message — hosting them per ChatStream double-rendered
                     every dialog when two streams were mounted (channel + thread). */}
                 <MessageActionDialogs />
+                <SubscriptionExpiredModal />
             </AppListeners>
         </ProtectedRoute>
     )

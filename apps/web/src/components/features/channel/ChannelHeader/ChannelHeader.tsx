@@ -1,10 +1,11 @@
 import { Button } from "@components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@components/ui/tooltip"
-import { ArrowUpRight, ChevronLeft, Pin, Star } from "lucide-react"
+import { ArrowUpRight, ChevronLeft, Pin, Search, Star } from "lucide-react"
 import { ChannelIcon } from "@components/common/ChannelIcon/ChannelIcon"
 import ChannelMembers from "./ChannelMembers"
 import ChannelMenu from "./ChannelMenu"
-import { useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
+import { commandMenuOpenAtom } from "@components/features/cmdk/atoms"
 import { channelDrawerAtom } from "@utils/channelAtoms"
 import { useOpenChannelDrawer } from "@hooks/useChannelDrawer"
 import { useLocation, useParams } from "react-router-dom"
@@ -32,6 +33,7 @@ const ChannelHeader = ({ channelID, showActions = true, onOpenChannel }: Channel
     const { channel, toggleStarChannel, isStarred } = useChannel(channelID)
     const { workspaceID } = useParams()
     const isMobile = useIsMobile()
+    const setCommandMenuOpen = useSetAtom(commandMenuOpenAtom)
 
     // Mobile back: pop history, so it lands wherever this chat was opened from
     // (channel list, notifications, …). The cold-start fallback comes from the
@@ -121,6 +123,16 @@ const ChannelHeader = ({ channelID, showActions = true, onOpenChannel }: Channel
 
             {/* Right side */}
             <div className="flex items-center gap-1 ml-auto shrink-0 pl-1">
+                {shouldShowActions && (
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <Button variant="ghost" size={isMobile ? "lg" : "sm"} isIconButton onClick={() => setCommandMenuOpen(true)} aria-label={_('Search messages')}>
+                                <Search />
+                            </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{_('Search messages')}</TooltipContent>
+                    </Tooltip>
+                )}
                 {onOpenChannel && !isMobile && (
                     <Tooltip>
                         <TooltipTrigger asChild>
