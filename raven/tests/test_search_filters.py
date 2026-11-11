@@ -7,6 +7,12 @@ from raven.api.search import RavenSearch, sqlite_search, validate_filter_keys
 
 
 class TestSearchFilters(IntegrationTestCase):
+	def test_message_fields_include_name(self):
+		# Full rebuilds fetch only these fields. The base class drops docs
+		# without `name`, so omitting it here silently empties the index.
+		fields = RavenSearch.INDEXABLE_DOCTYPES["Raven Message"]["fields"]
+		self.assertIn("name", fields)
+
 	def test_rejects_a_key_that_is_sql(self):
 		# The audit's payload: this key turned the permission filter into "OR 1=1".
 		filters = json.dumps({"1=1 OR channel_id": "x"})
